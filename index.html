@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光の正体ってなんだろう！？ - 小学生から始めるヤングの実験入門</title>
+    <!-- CSS Style sheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <!-- Hero Header -->
+    <header class="hero">
+        <span class="hero-tag">物理のふしぎ体験</span>
+        <h1 class="hero-title">光の正体ってなんだろう！？</h1>
+        <p class="hero-desc">
+            光は、ちいさな「つぶ（粒）」？それとも水のような「なみ（波）」？<br>
+            ２本のすきま（スリット）が織りなす不思議な模様のナゾを、クイズと実験で解き明かしましょう！
+        </p>
+        <a href="#section-intro" class="btn-duo" style="--btn-color: var(--color-indigo); --btn-shadow: var(--color-indigo-shadow);">
+            授業をはじめる
+            <i data-lucide="arrow-down" style="width: 1.25rem; height: 1.25rem;"></i>
+        </a>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="max-width: 900px;">
+
+        <!-- Intro -->
+        <div id="section-intro" class="lesson-card">
+            <span class="card-badge">導入</span>
+            <h2 class="section-title">光の正体は「つぶ」か「なみ」か？</h2>
+            <p class="section-desc">
+                私たちが普段見ている「光」は、一体何でできているのでしょうか？<br>
+                昔の科学者たちは、光が<b>「ちいさなつぶ（粒子）」</b>なのか、それとも<b>「水面のように広がるなみ（波）」</b>なのか、長年研究を続けてきました。
+            </p>
+        </div>
+
+        <!-- Quiz 1 -->
+        <div class="lesson-card">
+            <span class="card-badge" style="background: var(--color-orange); box-shadow: 0 4px 0 0 var(--color-orange-shadow);">クイズ</span>
+            <h2 class="section-title">「つぶ」を２つのすきまに投げると？</h2>
+            <p class="section-desc">
+                もしも光が「ちいさなつぶ（テニスボール）」だとしたら、２つの縦に細長いすきま（スリット）がある壁に向かってたくさん投げたとき、その奥にある壁にはどんな模様ができるでしょうか？
+            </p>
+            <div class="quiz-options">
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">A</span>
+                    <span>すきまと同じ「２本の縦線」の模様になる</span>
+                </div>
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">B</span>
+                    <span>たくさん並んだ「しましま（縞模様）」になる</span>
+                </div>
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">C</span>
+                    <span>壁ぜんぶが「たいらに明るく」なる</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulator 1: Particle Mode -->
+        <div class="lesson-card">
+            <span class="card-badge" style="background: var(--color-primary); box-shadow: 0 4px 0 0 var(--color-primary-shadow);">実験１</span>
+            <h2 class="section-title">つぶの動きを観察しよう</h2>
+            <p class="section-desc">
+                下の実験装置で「通常スピード」や「早送り」ボタンを押して、つぶが飛ぶ様子を見てみましょう！<br>
+                本当に壁に２つの山（２本の線）ができるかな？
+            </p>
+            <div class="sim-device-large" style="margin-bottom: 2rem;">
+                <iframe src="sim-particle.html" title="つぶのシミュレーター"></iframe>
+            </div>
+            <button class="btn-duo" style="margin-top: 0.5rem; --btn-color: var(--color-teal); --btn-shadow: var(--color-teal-shadow);" onclick="revealAnswer('result-particle')">実験の答え合わせ</button>
+            <button class="btn-duo" style="margin-top: 0.5rem; margin-left: 0.5rem; --btn-color: var(--color-blue); --btn-shadow: var(--color-blue-shadow);" onclick="revealAnswer('explanation-quiz-1')">クイズのこたえ</button>
+            <div id="result-particle" class="answer-reveal">
+                <p style="font-weight: bold; color: var(--color-primary); font-size: 1.2rem; margin-top: 0;">実験のまとめ：「２本線の山」になった！</p>
+                <p>つぶ（粒子）の性質だけを持っているものは、すきまの奥で重なり合ってもお互いに影響しないため、それぞれのすきまの奥に１つずつ、合わせて２つの山（オレンジ色のグラフ）を作ります。</p>
+            </div>
+            <div id="explanation-quiz-1" class="answer-reveal">
+                <p style="font-weight: bold; color: var(--color-primary); font-size: 1.2rem; margin-top: 0;">正解は「A. すきまと同じ「２本の縦線」の模様になる」です！</p>
+                <p>つぶはまっすぐ飛ぶので、すきまを通り抜けたものだけがまっすぐ奥の壁に当たります。だから、すきまの形と同じ２本の縦線がくっきりと浮かび上がります。</p>
+            </div>
+        </div>
+
+        <!-- Word intro -->
+        <div class="lesson-card">
+            <span class="card-badge">言葉のおぼえがき</span>
+            <h2 class="section-title">波の「まわりこみ」と「かさなりあい」</h2>
+            <p class="section-desc">
+                波には、つぶ（粒子）とは異なる２つの性質があります。
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem;">
+                <div class="concept-item">
+                    <div class="concept-icon-wrap" style="--concept-bg: #e6faf5; --concept-color: var(--color-teal); --concept-shadow: var(--color-teal-shadow);">
+                        <i data-lucide="shrink"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800;">① まわりこみ（回折 - かいせつ）</h3>
+                        <p class="concept-text" style="font-size: 1rem; color: var(--color-text-muted);">波がせまいすきまを通ると、そこを中心にして、まるで扇風機のように丸く広がって進んでいきます。</p>
+                    </div>
+                </div>
+                <div class="concept-item">
+                    <div class="concept-icon-wrap" style="--concept-bg: #eff6ff; --concept-color: var(--color-blue); --concept-shadow: var(--color-blue-shadow);">
+                        <i data-lucide="merge"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800;">② かさなりあい（干渉 - かんしょう）</h3>
+                        <p class="concept-text" style="font-size: 1rem; color: var(--color-text-muted);">２つの丸い波が出会うと、波の「山と山」が重なる場所は<b>もっと高い波（明るい）</b>になり、「山と谷」が重なる場所は<b>平らになって消えます（暗い）</b>。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz 2 -->
+        <div class="lesson-card">
+            <span class="card-badge" style="background: var(--color-orange); box-shadow: 0 4px 0 0 var(--color-orange-shadow);">クイズ</span>
+            <h2 class="section-title">「なみ」を２つのすきまに通すと？</h2>
+            <p class="section-desc">
+                もしも光が「水面の波（なみ）」だとしたら、２本のスリットを通り抜けたあとに重なり合うことで、奥の壁にはどんな模様ができるでしょうか？
+            </p>
+            <div class="quiz-options">
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">A</span>
+                    <span>つぶと同じ「２本の縦線」になる</span>
+                </div>
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">B</span>
+                    <span>明るい所と暗い所が交互にならぶ「しましま模様」になる</span>
+                </div>
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">C</span>
+                    <span>波が消し合って、どこにも何も映らなくなる</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulator 2: Wave Mode -->
+        <div class="lesson-card">
+            <span class="card-badge" style="background: var(--color-primary); box-shadow: 0 4px 0 0 var(--color-primary-shadow);">実験２</span>
+            <h2 class="section-title">波の重なりを観察しよう</h2>
+            <p class="section-desc">
+                下の実験装置で波が伝わっていく様子を見てみましょう！<br>
+                ２つのすきまから広がった波がぶつかり合って、きれいな「しましま模様」（青色のグラフ）ができるのを確認しましょう！
+            </p>
+            <div class="sim-device-large" style="margin-bottom: 2rem;">
+                <iframe src="sim-wave.html" title="波のシミュレーター"></iframe>
+            </div>
+            <button class="btn-duo" style="margin-top: 0.5rem; --btn-color: var(--color-blue); --btn-shadow: var(--color-blue-shadow);" onclick="revealAnswer('explanation-quiz-2')">クイズのこたえ</button>
+            <div id="explanation-quiz-2" class="answer-reveal">
+                <p style="font-weight: bold; color: var(--color-primary); font-size: 1.2rem; margin-top: 0;">正解は「B. 明るい所と暗い所が交互にならぶ「しましま模様」になる」です！</p>
+                <p>２つのすきまから扇状に広がった波がお互いに重なり合い、強め合う場所（明るい）と弱め合う場所（暗い）が交互に生まれるため、美しい<b>【しましま模様】</b>が浮かび上がります。これを物理の言葉で<b>【干渉縞（かんしょうじま）】</b>と呼びます。</p>
+            </div>
+        </div>
+
+        <!-- Young history -->
+        <div class="lesson-card">
+            <span class="card-badge" style="background: var(--color-teal); box-shadow: 0 4px 0 0 var(--color-teal-shadow);">まとめ</span>
+            <h2 class="section-title">光の波としての性質：ヤングの実験</h2>
+            <p class="section-desc">
+                今から約200年前、イギリスの科学者<b>トーマス・ヤング</b>が光を使った２本すきま（ダブルスリット）実験を行いました。<br>
+                その結果、壁には見事な「しましま模様（干渉縞）」が現れました。<br>
+                この実験によって「光は波の性質を持っている」ことが確かめられ、現在でも<b>【ヤングの実験】</b>として広く知られています。
+            </p>
+        </div>
+
+        <!-- Modern mystery & Simulator 3: Quantum Mode -->
+        <div class="lesson-card">
+            <span class="card-badge" style="background: var(--color-indigo); box-shadow: 0 4px 0 0 var(--color-indigo-shadow);">挑戦</span>
+            <h2 class="section-title">現代物理学の不思議な現象</h2>
+            <p class="section-desc">
+                「光は波である」と確かめられた後、科学技術が進歩し、光を<b>「完全に１粒ずつ」</b>発射する実験ができるようになりました。つぶを1つずつ投げるのであれば、すきまをまっすぐ通り抜けて「２本の縦線」になるはずだと考えられていました。<br><br>
+                ところが、何万回も記録を重ねていくと、驚くべきことに壁には波と同じ<b>【しましま模様】</b>が浮かび上がったのです。<br><br>
+                下のシミュレーターで「早送り」を押して、１粒ずつ壁に当たった跡がたまっていったとき、どんな模様ができるか観察してみましょう！
+            </p>
+            
+            <div class="sim-device-large" style="margin-bottom: 2rem; margin-top: 1.5rem;">
+                <iframe src="sim-quantum.html" title="量子のシミュレーター"></iframe>
+            </div>
+
+            <p class="section-desc" style="margin-top: 1.5rem; margin-bottom: 0;">
+                １粒ずつ飛んでいるはずなのに、なぜ波のように「しましま模様」ができたのでしょうか？ １つのつぶが「２つのすきまを同時に通り抜けた」としか考えられないような、非常に不思議なふるまいです。これは<b>【量子力学（りょうしりきがく）】</b>と呼ばれる、現代物理学の重要なテーマの一つです。
+            </p>
+        </div>
+
+        <!-- Discussion: Triple Slit -->
+        <div class="lesson-card">
+            <span class="card-badge" style="background: #6236ff; box-shadow: 0 4px 0 0 #4f28cc;">みんなで考えよう</span>
+            <h2 class="section-title">すきまを「３つ」に増やすと、模様はどうなる？</h2>
+            <p class="section-desc">
+                すきまが２つのときは「しましま模様」ができましたね。<br>
+                では、すきまを３つ（3重スリット）に増やすと、波はどう重なり合うでしょうか？<br>
+                どんな模様ができるか、自由に想像してみんなで話し合ってみましょう！
+            </p>
+            
+            <div class="sim-device-large" style="margin-bottom: 2rem; margin-top: 1.5rem;">
+                <iframe src="sim-triple-slit.html" title="3重スリットのシミュレーター"></iframe>
+            </div>
+            
+            <button class="btn-duo" style="margin-top: 0.5rem; --btn-color: var(--color-indigo); --btn-shadow: var(--color-indigo-shadow);" onclick="revealAnswer('explanation-triple')">みんなのアイデアと解説をひらく</button>
+            <div id="explanation-triple" class="answer-reveal">
+                <p style="font-weight: bold; color: var(--color-primary); font-size: 1.2rem; margin-top: 0;">解説：明るい線のとなりに「少し薄い明るい線」が並ぶ、複雑な模様になります！</p>
+                <p>3重スリットでは、３つのすきまから出た波が複雑に重なり合います。そのため、３つの波の山がぴったり重なる「超強力な明るい場所（主極大）」と、２つの波だけが重なる「少し薄い明るい場所（副極大）」が交互に現れ、強弱のある賑やかなしましま模様（ピンク色のグラフ）になります。</p>
+                <p>さらにシミュレーターをよく見ると、青色で光る<b>「S字カーブ（ループ）」を描く不思議なつぶ</b>がたまに飛んでいます！ これは、すきまの間を行ったり来たりループする非常に珍しい軌道で、３本以上のすきまがあることで初めて起こる、最新の量子力学でも研究されている不思議なミステリーです。</p>
+            </div>
+        </div>
+
+        <!-- Column: Material Wave -->
+        <div class="lesson-card">
+            <span class="card-badge" style="background: #eab308; box-shadow: 0 4px 0 0 #ca8a04;">コラム</span>
+            <h2 class="section-title">光だけじゃない！？ どんどん大きくなる「波」の仲間たち</h2>
+            <p class="section-desc">
+                しましま模様（干渉縞）を作るのは「光」や「電子」のような極めて小さなものだけだと思われてきました。しかし科学が進歩するにつれて、より大きくて重いものでも、同じように波の性質を持つことが実験で確かめられています。
+            </p>
+            <div class="table-responsive" style="margin-top: 1.5rem; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="background-color: var(--color-surface); border-bottom: 2px solid var(--color-border);">
+                            <th style="padding: 1rem; font-weight: bold; color: var(--color-text);">時期</th>
+                            <th style="padding: 1rem; font-weight: bold; color: var(--color-text);">実験の内容</th>
+                            <th style="padding: 1rem; font-weight: bold; color: var(--color-text);">おおよその大きさ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid var(--color-border);">
+                            <td style="padding: 1rem; color: var(--color-text-muted);">1801–1803年</td>
+                            <td style="padding: 1rem;">ヤングが光の干渉を示し、光の波の性質が確かめられた。</td>
+                            <td style="padding: 1rem;">-</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--color-border);">
+                            <td style="padding: 1rem; color: var(--color-text-muted);">1927年</td>
+                            <td style="padding: 1rem;">デイヴィソン＝ガーマーの実験により、電子（粒子）の干渉を確認。</td>
+                            <td style="padding: 1rem;">0.0005 Da<br><span style="font-size: 0.85rem; color: var(--color-text-muted);">(電子1個分)</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--color-border);">
+                            <td style="padding: 1rem; color: var(--color-text-muted);">1989年</td>
+                            <td style="padding: 1rem;">外村彰らが1個ずつ電子を放出した場合の干渉縞を実証。</td>
+                            <td style="padding: 1rem;">0.0005 Da<br><span style="font-size: 0.85rem; color: var(--color-text-muted);">(電子1個分)</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--color-border);">
+                            <td style="padding: 1rem; color: var(--color-text-muted);">1999年</td>
+                            <td style="padding: 1rem;">フラーレン (C₆₀) 分子を用いた干渉実験に成功。</td>
+                            <td style="padding: 1rem;">720 Da<br><span style="font-size: 0.85rem; color: var(--color-text-muted);">(原子60個分)</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; color: var(--color-text-muted);">2026年</td>
+                            <td style="padding: 1rem; font-weight: bold;">ナトリウム金属ナノ粒子の干渉が実証。（最近の大きなニュース！）</td>
+                            <td style="padding: 1rem; font-weight: bold; color: var(--color-primary);">1,000,000 Da<br><span style="font-size: 0.85rem; font-weight: normal; color: var(--color-text-muted);">(原子約43000個分)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="section-desc" style="margin-top: 1rem; font-size: 0.95rem;">
+                ※「Da（ダルトン）」は小さなものの重さを表す単位です。最初の電子から比べると、最近ではなんと<b>20億倍</b>も重くて大きな粒で干渉縞を作れるようになっています！
+            </p>
+        </div>
+
+        <!-- Final quiz 1 -->
+        <div class="lesson-card">
+            <span class="card-badge" style="background: var(--color-teal); box-shadow: 0 4px 0 0 var(--color-teal-shadow);">小テスト</span>
+            <h2 class="section-title">第1問</h2>
+            <p class="section-desc">
+                ２つのすきまから出た波の「山」と「谷」がぶつかって、お互いに打ち消し合って波が平らになった場所は、光としてはどうなるでしょう？
+            </p>
+            <div class="quiz-options">
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">A</span>
+                    <span>とても明るくピカッと光る</span>
+                </div>
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">B</span>
+                    <span>暗くなる（黒い縞になる）</span>
+                </div>
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">C</span>
+                    <span>レインボー色に光る</span>
+                </div>
+            </div>
+            <button class="btn-duo" style="margin-top: 1.5rem; --btn-color: var(--color-blue); --btn-shadow: var(--color-blue-shadow);" onclick="revealAnswer('explanation-test-1')">こたえと解説をひらく</button>
+            <div id="explanation-test-1" class="answer-reveal">
+                <p style="font-weight: bold; color: var(--color-primary); font-size: 1.2rem; margin-top: 0;">正解は「B. 暗くなる（黒い縞になる）」です！</p>
+                <p>波がお互いに打ち消し合う場所は、波の高さが０（平ら）になります。光の波が消えてエネルギーがなくなるため、暗い影になります。</p>
+            </div>
+        </div>
+
+        <!-- Final quiz 2 -->
+        <div class="lesson-card">
+            <span class="card-badge" style="background: var(--color-teal); box-shadow: 0 4px 0 0 var(--color-teal-shadow);">小テスト</span>
+            <h2 class="section-title">第2問</h2>
+            <p class="section-desc">
+                ヤングの実験で、光が「なみ（波）」の性質を持っていることを証明するために使った壁の【すきま】の数はいくつでしょう？
+            </p>
+            <div class="quiz-options">
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">A</span>
+                    <span>１つ（シングルスリット）</span>
+                </div>
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">B</span>
+                    <span>２つ（ダブルスリット）</span>
+                </div>
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">C</span>
+                    <span>１００個</span>
+                </div>
+            </div>
+            <button class="btn-duo" style="margin-top: 1.5rem; --btn-color: var(--color-blue); --btn-shadow: var(--color-blue-shadow);" onclick="revealAnswer('explanation-test-2')">こたえと解説をひらく</button>
+            <div id="explanation-test-2" class="answer-reveal">
+                <p style="font-weight: bold; color: var(--color-primary); font-size: 1.2rem; margin-top: 0;">正解は「B. ２つ（ダブルスリット）」です！</p>
+                <p>２つのすきまを通って広がった波が出会って重なり合うことで、はじめて干渉縞（しましま）を作ることができます。そのため、２つのすきまが必要でしたね！</p>
+            </div>
+        </div>
+
+        <!-- Final quiz 3 -->
+        <div class="lesson-card">
+            <span class="card-badge" style="background: var(--color-teal); box-shadow: 0 4px 0 0 var(--color-teal-shadow);">小テスト</span>
+            <h2 class="section-title">第3問</h2>
+            <p class="section-desc">
+                3重スリット（3つのすきま）の実験では、光のつぶがどんな珍しい動きをすることがあるでしょう？
+            </p>
+            <div class="quiz-options">
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">A</span>
+                    <span>途中で急ブレーキをかけて止まる</span>
+                </div>
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">B</span>
+                    <span>すきまの間をくるっと回る「S字ループ軌道」を描く</span>
+                </div>
+                <div class="quiz-opt" onclick="selectOption(this)">
+                    <span class="quiz-badge">C</span>
+                    <span>壁をすり抜けて瞬間移動（ワープ）する</span>
+                </div>
+            </div>
+            <button class="btn-duo" style="margin-top: 1.5rem; --btn-color: var(--color-blue); --btn-shadow: var(--color-blue-shadow);" onclick="revealAnswer('explanation-test-3')">こたえと解説をひらく</button>
+            <div id="explanation-test-3" class="answer-reveal">
+                <p style="font-weight: bold; color: var(--color-primary); font-size: 1.2rem; margin-top: 0;">正解は「B. すきまの間をくるっと回る「S字ループ軌道」を描く」です！</p>
+                <p>3重スリットのシミュレーターでときどき青く光りながらカーブしていたのが、すきまを往復するループ光子です。つぶなのにまるで波のように全体をうろうろしてからスクリーンに到達する、量子力学のとても不思議な現象です。</p>
+            </div>
+        </div>
+
+        <!-- Goal card -->
+        <div class="lesson-card" style="text-align: center; border-color: var(--color-primary); border-bottom-color: var(--color-primary-shadow);">
+            <h2 class="section-title" style="color: var(--color-primary); margin-top: 1rem;">ミッションクリア！</h2>
+            <p class="section-desc" style="margin-bottom: 2rem;">
+                ２本すきまと３本すきまの不思議な実験について、すべてのひみつを学ぶことができました！<br>
+                光が波であることや、現代物理の不思議についてマスターした君は、もう立派な小さな物理学者です！
+            </p>
+            <i data-lucide="award" style="width: 5rem; height: 5rem; color: var(--color-orange); margin-bottom: 1.5rem;"></i>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-logo">光の正体ってなんだろう！？</div>
+            <div class="footer-text">小学生から始める物理学入門 授業用資料</div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Handle option selection locally
+        function selectOption(element) {
+            const parent = element.parentElement;
+            const options = parent.querySelectorAll('.quiz-opt');
+            options.forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+
+        // Reveal hidden answers/explanations
+        function revealAnswer(explanationId) {
+            const explanation = document.getElementById(explanationId);
+            if (explanation) {
+                explanation.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

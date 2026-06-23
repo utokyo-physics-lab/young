@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>つぶ（粒子）の実験</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            color: #2b3a4a;
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #canvas-container {
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 10px;
+        }
+
+        canvas {
+            display: block;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-bottom-width: 6px;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .ui-container {
+            width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            background: #f1f5f9;
+            border-top: 2px solid #e2e8f0;
+            z-index: 10;
+        }
+
+        /* コントロールボタン：Duolingo風 */
+        .btn-duo-sm {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #ffffff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.85rem;
+            cursor: pointer;
+            border: none;
+            background-color: var(--btn-color, #1899d6);
+            box-shadow: 0 4px 0 0 var(--btn-shadow, #1279ab);
+            transition: all 0.1s ease;
+            user-select: none;
+            text-decoration: none;
+        }
+
+        .btn-duo-sm:hover {
+            filter: brightness(1.05);
+        }
+
+        .btn-duo-sm:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 0 transparent;
+        }
+
+        .btn-duo-sm.playing {
+            background-color: #64748b;
+            box-shadow: 0 4px 0 0 #475569;
+        }
+
+        /* アクティブなスピード状態の強調 */
+        .btn-duo-sm.active-speed {
+            background-color: #ff9600;
+            box-shadow: 0 4px 0 0 #e07b00;
+        }
+
+        .btn-duo-sm svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container">
+        <canvas id="simCanvas"></canvas>
+    </div>
+
+    <div class="ui-container">
+        <!-- 再生/停止 -->
+        <button id="btn-play" class="btn-duo-sm">
+            <svg id="icon-play" viewBox="0 0 24 24" style="display:none;">
+                <path d="M8 5v14l11-7z" />
+            </svg>
+            <svg id="icon-pause" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+            </svg>
+            <span id="btn-play-text">ストップ</span>
+        </button>
+
+        <!-- スピード切替 -->
+        <button id="btn-normal" class="btn-duo-sm active-speed">
+            <svg viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+            </svg>
+            <span>通常スピード</span>
+        </button>
+
+        <button id="btn-fast" class="btn-duo-sm" style="--btn-color: #64748b; --btn-shadow: #475569;">
+            <svg viewBox="0 0 24 24">
+                <path d="M5 4l9 8-9 8V4zm9 0l9 8-9 8V4z" />
+            </svg>
+            <span>早送り</span>
+        </button>
+
+        <!-- クリア/リセット -->
+        <button id="btn-reset" class="btn-duo-sm" style="--btn-color: #ef4444; --btn-shadow: #b91c1c; margin-left: auto;">
+            <svg viewBox="0 0 24 24">
+                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+            </svg>
+            <span>やりなおす</span>
+        </button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const btnPlay = document.getElementById('btn-play');
+        const iconPlay = document.getElementById('icon-play');
+        const iconPause = document.getElementById('icon-pause');
+        const btnPlayText = document.getElementById('btn-play-text');
+        const btnNormal = document.getElementById('btn-normal');
+        const btnFast = document.getElementById('btn-fast');
+        const btnReset = document.getElementById('btn-reset');
+
+        const CANVAS_WIDTH = 800;
+        const CANVAS_HEIGHT = 400;
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+
+        const SLIT_X = 350;
+        const SCREEN_X = 650;
+        const SLIT_Y1 = 150;
+        const SLIT_Y2 = 250;
+        const SLIT_WIDTH = 30;
+
+        let isPlaying = false;
+        let isFastForward = false;
+        let particles = [];
+        let hits = new Array(CANVAS_HEIGHT).fill(0);
+        let maxHits = 1;
+        let animationId;
+
+        // セットアップ（壁とスクリーンの描画）
+        function drawSetup() {
+            // 背景の薄いガイドライン
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            for (let x = 50; x < CANVAS_WIDTH; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, CANVAS_HEIGHT);
+                ctx.stroke();
+            }
+
+            // スリット障壁の描画
+            ctx.fillStyle = '#64748b'; // マイルドなグレー
+            ctx.fillRect(SLIT_X - 6, 0, 12, CANVAS_HEIGHT);
+            
+            // スリット部分の切り抜き（クリア）
+            ctx.clearRect(SLIT_X - 6, SLIT_Y1 - SLIT_WIDTH / 2, 12, SLIT_WIDTH);
+            ctx.clearRect(SLIT_X - 6, SLIT_Y2 - SLIT_WIDTH / 2, 12, SLIT_WIDTH);
+
+            // 切り抜き部分の枠線
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 2;
+            // 上壁
+            ctx.strokeRect(SLIT_X - 6, -2, 12, SLIT_Y1 - SLIT_WIDTH / 2 + 2);
+            // 中壁
+            ctx.strokeRect(SLIT_X - 6, SLIT_Y1 + SLIT_WIDTH / 2, 12, (SLIT_Y2 - SLIT_WIDTH / 2) - (SLIT_Y1 + SLIT_WIDTH / 2));
+            // 下壁
+            ctx.strokeRect(SLIT_X - 6, SLIT_Y2 + SLIT_WIDTH / 2, 12, CANVAS_HEIGHT - (SLIT_Y2 + SLIT_WIDTH / 2) + 2);
+
+            // スクリーン
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(SCREEN_X, 0, 4, CANVAS_HEIGHT);
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            drawSetup();
+
+            if (isPlaying) {
+                const spawnCount = isFastForward ? 8 : 1;
+                const speedMult = isFastForward ? 4 : 1;
+
+                // 粒子の生成
+                for (let i = 0; i < spawnCount; i++) {
+                    if (Math.random() < 0.6) {
+                        particles.push({
+                            x: 20,
+                            y: Math.random() * CANVAS_HEIGHT,
+                            vx: (5 + Math.random() * 2) * speedMult,
+                            vy: 0,
+                            active: true
+                        });
+                    }
+                }
+            }
+
+            // 粒子の描画・更新
+            ctx.fillStyle = '#ff9600'; // つぶの色（Duolingoオレンジ）
+            particles.forEach(p => {
+                if (!p.active) return;
+                
+                if (isPlaying) {
+                    const nextX = p.x + p.vx;
+                    const nextY = p.y + p.vy;
+
+                    // スリット通過処理
+                    if (p.x <= SLIT_X && nextX > SLIT_X) {
+                        const ratio = (SLIT_X - p.x) / (nextX - p.x);
+                        const crossY = p.y + (nextY - p.y) * ratio;
+
+                        const inSlit1 = Math.abs(crossY - SLIT_Y1) <= SLIT_WIDTH / 2;
+                        const inSlit2 = Math.abs(crossY - SLIT_Y2) <= SLIT_WIDTH / 2;
+                        if (inSlit1 || inSlit2) {
+                            p.vy = (Math.random() - 0.5) * 1.5 * (isFastForward ? 4 : 1);
+                        } else {
+                            p.active = false;
+                        }
+                    }
+
+                    // スクリーン到達処理
+                    if (p.active && nextX >= SCREEN_X) {
+                        p.active = false;
+                        const ratio = (SCREEN_X - p.x) / (nextX - p.x);
+                        const hitY = p.y + (nextY - p.y) * ratio;
+                        const floorY = Math.max(0, Math.min(CANVAS_HEIGHT - 1, Math.floor(hitY)));
+                        
+                        // グラフを滑らかにするため、衝突周辺も少し加算
+                        hits[floorY]++;
+                        if (hits[floorY] > maxHits) {
+                            maxHits = hits[floorY];
+                        }
+                    }
+
+                    p.x = nextX;
+                    p.y = nextY;
+                }
+
+                if (p.active) {
+                    ctx.beginPath();
+                    if (isFastForward) {
+                        ctx.fillRect(p.x, p.y - 1, Math.min(p.vx, 20), 2);
+                    } else {
+                        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            });
+
+            // 画面外または非アクティブな粒子をフィルタリング
+            particles = particles.filter(p => p.x < CANVAS_WIDTH && p.active);
+
+            // スクリーン背後の衝突グラフを描画
+            ctx.fillStyle = '#ff9600';
+            for (let y = 0; y < CANVAS_HEIGHT; y += 3) {
+                let count = hits[y] + hits[y + 1] + hits[y + 2];
+                if (count > 0) {
+                    const w = (count / (maxHits * 3)) * 120;
+                    ctx.fillRect(SCREEN_X + 10, y, w, 2);
+                }
+            }
+
+            animationId = requestAnimationFrame(render);
+        }
+
+        function setSpeedMode(fast) {
+            isFastForward = fast;
+            if (isFastForward) {
+                btnFast.classList.add('active-speed');
+                btnFast.style.backgroundColor = '';
+                btnFast.style.boxShadow = '';
+                btnNormal.classList.remove('active-speed');
+                btnNormal.style.backgroundColor = '#64748b';
+                btnNormal.style.boxShadow = '0 4px 0 0 #475569';
+            } else {
+                btnNormal.classList.add('active-speed');
+                btnNormal.style.backgroundColor = '';
+                btnNormal.style.boxShadow = '';
+                btnFast.classList.remove('active-speed');
+                btnFast.style.backgroundColor = '#64748b';
+                btnFast.style.boxShadow = '0 4px 0 0 #475569';
+            }
+            // 速度変更時、軌跡がジャンプするのを防ぐため既存の粒子を消去
+            particles = [];
+        }
+
+        function setPlayingState(playing) {
+            isPlaying = playing;
+            if (isPlaying) {
+                btnPlay.classList.remove('playing');
+                iconPlay.style.display = 'none';
+                iconPause.style.display = 'inline';
+                btnPlayText.textContent = 'ストップ';
+            } else {
+                btnPlay.classList.add('playing');
+                iconPlay.style.display = 'inline';
+                iconPause.style.display = 'none';
+                btnPlayText.textContent = 'スタート';
+            }
+        }
+
+        btnPlay.addEventListener('click', () => setPlayingState(!isPlaying));
+
+        btnNormal.addEventListener('click', () => setSpeedMode(false));
+        btnFast.addEventListener('click', () => setSpeedMode(true));
+
+        btnReset.addEventListener('click', () => {
+            setPlayingState(false);
+            particles = [];
+            hits.fill(0);
+            maxHits = 1;
+        });
+
+        // 起動
+        setPlayingState(false);
+        render();
+    </script>
+</body>
+</html>

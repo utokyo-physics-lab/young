@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>なみ（波動）の実験</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            color: #2b3a4a;
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #canvas-container {
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 10px;
+        }
+
+        canvas {
+            display: block;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-bottom-width: 6px;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .ui-container {
+            width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            background: #f1f5f9;
+            border-top: 2px solid #e2e8f0;
+            z-index: 10;
+        }
+
+        /* コントロールボタン：Duolingo風 */
+        .btn-duo-sm {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #ffffff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.85rem;
+            cursor: pointer;
+            border: none;
+            background-color: var(--btn-color, #00cd9c);
+            box-shadow: 0 4px 0 0 var(--btn-shadow, #00a880);
+            transition: all 0.1s ease;
+            user-select: none;
+            text-decoration: none;
+        }
+
+        .btn-duo-sm:hover {
+            filter: brightness(1.05);
+        }
+
+        .btn-duo-sm:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 0 transparent;
+        }
+
+        .btn-duo-sm.playing {
+            background-color: #64748b;
+            box-shadow: 0 4px 0 0 #475569;
+        }
+
+        .btn-duo-sm svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container">
+        <canvas id="simCanvas"></canvas>
+    </div>
+
+    <div class="ui-container">
+        <!-- 再生/停止 -->
+        <button id="btn-play" class="btn-duo-sm">
+            <svg id="icon-play" viewBox="0 0 24 24" style="display:none;">
+                <path d="M8 5v14l11-7z" />
+            </svg>
+            <svg id="icon-pause" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+            </svg>
+            <span id="btn-play-text">ストップ</span>
+        </button>
+
+        <!-- もどす -->
+        <button id="btn-reset" class="btn-duo-sm" style="--btn-color: #ef4444; --btn-shadow: #b91c1c; margin-left: auto;">
+            <svg viewBox="0 0 24 24">
+                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+            </svg>
+            <span>やりなおす</span>
+        </button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const btnPlay = document.getElementById('btn-play');
+        const btnPlayText = document.getElementById('btn-play-text');
+        const btnReset = document.getElementById('btn-reset');
+        const iconPlay = document.getElementById('icon-play');
+        const iconPause = document.getElementById('icon-pause');
+
+        const CANVAS_WIDTH = 800;
+        const CANVAS_HEIGHT = 400;
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = HEIGHT = CANVAS_HEIGHT;
+
+        const SLIT_X = 350;
+        const SCREEN_X = 650;
+        const SLIT_Y1 = 150;
+        const SLIT_Y2 = 250;
+        const SLIT_WIDTH = 30;
+        const WAVE_K = 0.35;
+        const WAVE_W = 0.15;
+
+        // オフスクリーン・キャンバス（解像度を下げて高速化：sample.jsと同様）
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = CANVAS_WIDTH / 2;
+        offCanvas.height = CANVAS_HEIGHT / 2;
+        const offCtx = offCanvas.getContext('2d');
+
+        let isPlaying = false;
+        let time = 0;
+        let animationId;
+
+        // 干渉縞の強度計算
+        function getInterferenceIntensity(y) {
+            const r1 = Math.hypot(SCREEN_X - SLIT_X, y - SLIT_Y1);
+            const r2 = Math.hypot(SCREEN_X - SLIT_X, y - SLIT_Y2);
+            const phaseDiff = WAVE_K * (r1 - r2);
+            const intensity = Math.pow(Math.cos(phaseDiff / 2), 2);
+            // 包絡線（中央を明るく、端を暗くする）
+            const envelope = Math.exp(-Math.pow((y - CANVAS_HEIGHT / 2) / 120, 2));
+            return intensity * envelope;
+        }
+
+        // セットアップ（壁とスクリーンの描画）
+        function drawSetup(targetCtx) {
+            // スリット障壁の描画
+            targetCtx.fillStyle = '#64748b'; // スレートグレー
+            targetCtx.fillRect(SLIT_X - 6, 0, 12, CANVAS_HEIGHT);
+            
+            // スリットの切り抜き
+            targetCtx.clearRect(SLIT_X - 6, SLIT_Y1 - SLIT_WIDTH / 2, 12, SLIT_WIDTH);
+            targetCtx.clearRect(SLIT_X - 6, SLIT_Y2 - SLIT_WIDTH / 2, 12, SLIT_WIDTH);
+
+            // 障壁の輪郭
+            targetCtx.strokeStyle = '#475569';
+            targetCtx.lineWidth = 2;
+            targetCtx.strokeRect(SLIT_X - 6, -2, 12, SLIT_Y1 - SLIT_WIDTH / 2 + 2);
+            targetCtx.strokeRect(SLIT_X - 6, SLIT_Y1 + SLIT_WIDTH / 2, 12, (SLIT_Y2 - SLIT_WIDTH / 2) - (SLIT_Y1 + SLIT_WIDTH / 2));
+            targetCtx.strokeRect(SLIT_X - 6, SLIT_Y2 + SLIT_WIDTH / 2, 12, CANVAS_HEIGHT - (SLIT_Y2 + SLIT_WIDTH / 2) + 2);
+
+            // スクリーン
+            targetCtx.fillStyle = '#cbd5e1';
+            targetCtx.fillRect(SCREEN_X, 0, 4, CANVAS_HEIGHT);
+        }
+
+        function render() {
+            if (isPlaying) {
+                time += 2;
+            }
+
+            const w = offCanvas.width;
+            const h = offCanvas.height;
+            const imgData = offCtx.createImageData(w, h);
+            const data = imgData.data;
+
+            const scale = 2;
+            const sX = SLIT_X / scale;
+            const s1y = SLIT_Y1 / scale;
+            const s2y = SLIT_Y2 / scale;
+
+            const k = WAVE_K * scale;
+            const omega = WAVE_W;
+
+            // 波の先端X座標
+            const waveFrontX = (omega / k) * time;
+
+            let i = 0;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    let val = 0;
+
+                    if (x < sX) {
+                        // 左側の入射平面波
+                        if (x <= waveFrontX) {
+                            val = Math.sin(k * x - omega * time);
+                        }
+                    } else {
+                        // スリットからの回折球面波
+                        const r1 = Math.hypot(x - sX, y - s1y);
+                        const r2 = Math.hypot(x - sX, y - s2y);
+
+                        let val1 = 0, val2 = 0;
+                        if (r1 <= waveFrontX - sX) {
+                            val1 = (1 / (1 + r1 * 0.03)) * Math.sin(k * r1 + k * sX - omega * time);
+                        }
+                        if (r2 <= waveFrontX - sX) {
+                            val2 = (1 / (1 + r2 * 0.03)) * Math.sin(k * r2 + k * sX - omega * time);
+                        }
+                        val = val1 + val2;
+                    }
+
+                    // ホワイトモード用のカラーマッピング：
+                    // 波の振幅 val (-1.6 〜 1.6) を 0 〜 1.0 に正規化
+                    const intensity = (val + 1.6) / 3.2;
+                    const clamped = Math.max(0, Math.min(1, intensity));
+
+                    // 白 (#ffffff) から青色 (#1899d6) へのブレンド
+                    // R: 255 -> 24
+                    // G: 255 -> 153
+                    // B: 255 -> 214
+                    data[i++] = 255 - (255 - 24) * clamped;
+                    data[i++] = 255 - (255 - 153) * clamped;
+                    data[i++] = 255 - (255 - 214) * clamped;
+                    data[i++] = 255;
+                }
+            }
+
+            offCtx.putImageData(imgData, 0, 0);
+            
+            // メインキャンバスへ拡大描画
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            ctx.drawImage(offCanvas, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            drawSetup(ctx);
+
+            // 干渉縞の理論グラフ（青色で描画）
+            ctx.strokeStyle = 'rgba(24, 153, 214, 0.7)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let y = 0; y < CANVAS_HEIGHT; y += 4) {
+                const intensity = getInterferenceIntensity(y);
+                const graphX = SCREEN_X + 10 + intensity * 100;
+                if (y === 0) ctx.moveTo(graphX, y);
+                else ctx.lineTo(graphX, y);
+            }
+            ctx.stroke();
+
+            // しましま模様のリアルな映像をスクリーン部分に描画
+            for (let y = 0; y < CANVAS_HEIGHT; y += 2) {
+                const intensity = getInterferenceIntensity(y);
+                ctx.fillStyle = '#1899d6';
+                ctx.globalAlpha = intensity;
+                ctx.fillRect(SCREEN_X - 6, y, 6, 2);
+            }
+            ctx.globalAlpha = 1.0;
+
+            animationId = requestAnimationFrame(render);
+        }
+
+        function setPlayingState(playing) {
+            isPlaying = playing;
+            if (isPlaying) {
+                btnPlay.classList.remove('playing');
+                iconPlay.style.display = 'none';
+                iconPause.style.display = 'inline';
+                btnPlayText.textContent = 'ストップ';
+            } else {
+                btnPlay.classList.add('playing');
+                iconPlay.style.display = 'inline';
+                iconPause.style.display = 'none';
+                btnPlayText.textContent = 'スタート';
+            }
+        }
+
+        btnPlay.addEventListener('click', () => {
+            setPlayingState(!isPlaying);
+        });
+
+        btnReset.addEventListener('click', () => {
+            setPlayingState(false);
+            time = 0;
+            render();
+        });
+
+        // 起動
+        setPlayingState(false);
+        render();
+    </script>
+</body>
+</html>
