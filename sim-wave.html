@@ -117,6 +117,11 @@
             <span id="btn-play-text">ストップ</span>
         </button>
 
+        <!-- グラフ表示切り替え -->
+        <button id="btn-toggle-graph" class="btn-duo-sm" style="--btn-color: #3b82f6; --btn-shadow: #1d4ed8;">
+            <span id="btn-toggle-graph-text">結果を表示</span>
+        </button>
+
         <!-- もどす -->
         <button id="btn-reset" class="btn-duo-sm" style="--btn-color: #ef4444; --btn-shadow: #b91c1c; margin-left: auto;">
             <svg viewBox="0 0 24 24">
@@ -134,6 +139,8 @@
         const btnReset = document.getElementById('btn-reset');
         const iconPlay = document.getElementById('icon-play');
         const iconPause = document.getElementById('icon-pause');
+        const btnToggleGraph = document.getElementById('btn-toggle-graph');
+        const btnToggleGraphText = document.getElementById('btn-toggle-graph-text');
 
         const CANVAS_WIDTH = 800;
         const CANVAS_HEIGHT = 400;
@@ -157,6 +164,7 @@
         let isPlaying = false;
         let time = 0;
         let animationId;
+        let showGraph = false; // 初期状態は非表示（ネタバレ防止）
 
         // 干渉縞の強度計算
         function getInterferenceIntensity(y) {
@@ -260,26 +268,28 @@
             ctx.drawImage(offCanvas, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             drawSetup(ctx);
 
-            // 干渉縞の理論グラフ（青色で描画）
-            ctx.strokeStyle = 'rgba(24, 153, 214, 0.7)';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            for (let y = 0; y < CANVAS_HEIGHT; y += 4) {
-                const intensity = getInterferenceIntensity(y);
-                const graphX = SCREEN_X + 10 + intensity * 100;
-                if (y === 0) ctx.moveTo(graphX, y);
-                else ctx.lineTo(graphX, y);
-            }
-            ctx.stroke();
+            if (showGraph) {
+                // 干渉縞の理論グラフ（青色で描画）
+                ctx.strokeStyle = 'rgba(24, 153, 214, 0.7)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                for (let y = 0; y < CANVAS_HEIGHT; y += 4) {
+                    const intensity = getInterferenceIntensity(y);
+                    const graphX = SCREEN_X + 10 + intensity * 100;
+                    if (y === 0) ctx.moveTo(graphX, y);
+                    else ctx.lineTo(graphX, y);
+                }
+                ctx.stroke();
 
-            // しましま模様のリアルな映像をスクリーン部分に描画
-            for (let y = 0; y < CANVAS_HEIGHT; y += 2) {
-                const intensity = getInterferenceIntensity(y);
-                ctx.fillStyle = '#1899d6';
-                ctx.globalAlpha = intensity;
-                ctx.fillRect(SCREEN_X - 6, y, 6, 2);
+                // しましま模様のリアルな映像をスクリーン部分に描画
+                for (let y = 0; y < CANVAS_HEIGHT; y += 2) {
+                    const intensity = getInterferenceIntensity(y);
+                    ctx.fillStyle = '#1899d6';
+                    ctx.globalAlpha = intensity;
+                    ctx.fillRect(SCREEN_X - 6, y, 6, 2);
+                }
+                ctx.globalAlpha = 1.0;
             }
-            ctx.globalAlpha = 1.0;
 
             animationId = requestAnimationFrame(render);
         }
@@ -303,8 +313,25 @@
             setPlayingState(!isPlaying);
         });
 
+        btnToggleGraph.addEventListener('click', () => {
+            showGraph = !showGraph;
+            if (showGraph) {
+                btnToggleGraphText.textContent = '結果を非表示';
+                btnToggleGraph.style.setProperty('--btn-color', '#64748b');
+                btnToggleGraph.style.setProperty('--btn-shadow', '#475569');
+            } else {
+                btnToggleGraphText.textContent = '結果を表示';
+                btnToggleGraph.style.setProperty('--btn-color', '#3b82f6');
+                btnToggleGraph.style.setProperty('--btn-shadow', '#1d4ed8');
+            }
+        });
+
         btnReset.addEventListener('click', () => {
             setPlayingState(false);
+            showGraph = false;
+            btnToggleGraphText.textContent = '結果を表示';
+            btnToggleGraph.style.setProperty('--btn-color', '#3b82f6');
+            btnToggleGraph.style.setProperty('--btn-shadow', '#1d4ed8');
             time = 0;
             render();
         });
